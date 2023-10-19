@@ -42,7 +42,9 @@ class Evaluator:
 
         self.inference_model = Net()
         self.inference_model.load_state_dict(
-            torch.load(self.args.path + "/mnist_cnn_ref.pt")
+            torch.load(
+                self.args.path + "/mnist_cnn_ref.pt", map_location=torch.device("cpu")
+            )
         )
         self.inference_model.to(self.device)
 

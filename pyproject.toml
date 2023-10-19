@@ -1,19 +1,19 @@
 [tool.poetry]
-name = "mnist-allreduce"
+name = "mlops-mnist"
 version = "0.1.0"
 description = ""
 authors = ["Aznaur <aliev.ak@phystech.edu>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.8"
-torch = {version = "^2.1.0", python = "^3.8", platform = "linux"}
-torchvision = {version = "^0.16.0", python = "^3.8", platform = "linux"}
+python = "^3.10"
+torch = {version = "^2.1.0+cpu", source = "pytorch"}
+torchvision = {version = "^0.16.0+cpu", source = "pytorch"}
 
 
 [[tool.poetry.source]]
 name = "pytorch"
-url = "https://download.pytorch.org/whl/cu115"
+url = "https://download.pytorch.org/whl/cpu"
 priority = "explicit"
 
 [build-system]
