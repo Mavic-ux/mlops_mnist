@@ -1,5 +1,5 @@
-import csv
 import argparse
+import csv
 
 import torch
 import torch.utils.data
@@ -41,7 +41,9 @@ class Evaluator:
         self.test_loader = torch.utils.data.DataLoader(self.dataset_val, **test_kwargs)
 
         self.inference_model = Net()
-        self.inference_model.load_state_dict(torch.load(self.args.path + '/mnist_cnn_ref.pt'))
+        self.inference_model.load_state_dict(
+            torch.load(self.args.path + "/mnist_cnn_ref.pt")
+        )
         self.inference_model.to(self.device)
 
     def evaluate(self):
@@ -59,7 +61,7 @@ class Evaluator:
             preds.append(pred.detach().cpu().numpy())
             correct += pred.eq(target.view_as(pred)).sum().item()
 
-        with open(self.args.path + '/predictions.csv', 'w+') as csvfile:
+        with open(self.args.path + "/predictions.csv", "w+") as csvfile:
             writer = csv.writer(csvfile)
             for row in preds:
                 for pred in row:
