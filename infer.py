@@ -1,3 +1,4 @@
+import csv
 import argparse
 
 import torch
@@ -40,7 +41,7 @@ class Evaluator:
         self.test_loader = torch.utils.data.DataLoader(self.dataset_val, **test_kwargs)
 
         self.inference_model = Net()
-        self.inference_model.load_state_dict(torch.load(args.path))
+        self.inference_model.load_state_dict(torch.load(self.args.path + '/mnist_cnn_ref.pt'))
         self.inference_model.to(self.device)
 
     def evaluate(self):
@@ -48,13 +49,21 @@ class Evaluator:
 
         test_loss = 0
         correct = 0
-        for data, target in self.test_loader:
+        preds = []
+        for i, (data, target) in enumerate(self.test_loader):
             data, target = data.to(self.device), target.to(self.device)
             step_info_dp = self.inference_model(data)
             pred = step_info_dp.detach().argmax(
                 dim=1, keepdim=True
             )  # get the index of the max log-probability
+            preds.append(pred.detach().cpu().numpy())
             correct += pred.eq(target.view_as(pred)).sum().item()
+
+        with open(self.args.path + '/predictions.csv', 'w+') as csvfile:
+            writer = csv.writer(csvfile)
+            for row in preds:
+                for pred in row:
+                    writer.writerow(pred)
 
         test_loss /= len(self.test_loader.dataset)
 
@@ -73,7 +82,7 @@ def parse_args(external_args=None):
     parser.add_argument(
         "--test-batch-size",
         type=int,
-        default=1000,
+        default=100,
         metavar="N",
         help="input batch size for testing (default: 1000)",
     )
@@ -86,7 +95,7 @@ def parse_args(external_args=None):
     parser.add_argument(
         "--path",
         type=str,
-        default="checkpoints/mnist_cnn_ref.pt",
+        default="checkpoints",
         metavar="N",
         help="directory for model saves",
     )
