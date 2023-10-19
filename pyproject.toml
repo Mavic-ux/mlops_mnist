@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "mnist-allreduce"
+version = "0.1.0"
+description = ""
+authors = ["Aznaur <aliev.ak@phystech.edu>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+torch = {version = "^2.1.0", python = "^3.8", platform = "linux"}
+torchvision = {version = "^0.16.0", python = "^3.8", platform = "linux"}
+
+
+[[tool.poetry.source]]
+name = "pytorch"
+url = "https://download.pytorch.org/whl/cu115"
+priority = "explicit"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

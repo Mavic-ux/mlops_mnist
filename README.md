@@ -1,0 +1,1 @@
+# MLOps porject based on MNIST classifier
