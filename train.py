@@ -190,7 +190,7 @@ def parse_args(external_args=None):
     parser.add_argument(
         "--save-model",
         action="store_true",
-        default=False,
+        default=True,
         help="For Saving the current Model",
     )
     parser.add_argument(
