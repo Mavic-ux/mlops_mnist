@@ -22,7 +22,8 @@ python3 train.py
 python3 infer.py
 
 # Model and predictions are stored in checkpoints/ directory be default
+cd checkpoints
 
-# Exit the virtual environment
+# To exit the virtual environment
 exit
 ```
