@@ -1,0 +1,4 @@
+*.pyc
+outputs
+checkpoints
+requirements.txt

@@ -1,6 +1,6 @@
-import argparse
 import csv
 
+import hydra
 import torch
 import torch.utils.data
 from torchvision import datasets, transforms
@@ -80,39 +80,9 @@ class Evaluator:
         )
 
 
-def parse_args(external_args=None):
-    # Training settings
-    parser = argparse.ArgumentParser(description="PyTorch MNIST model evaluate")
-    parser.add_argument(
-        "--test-batch-size",
-        type=int,
-        default=100,
-        metavar="N",
-        help="input batch size for testing (default: 1000)",
-    )
-    parser.add_argument(
-        "--no-cuda", action="store_true", default=False, help="disables CUDA training"
-    )
-    parser.add_argument(
-        "--seed", type=int, default=1, metavar="S", help="random seed (default: 1)"
-    )
-    parser.add_argument(
-        "--path",
-        type=str,
-        default="checkpoints",
-        metavar="N",
-        help="directory for model saves",
-    )
-    if external_args is not None:
-        args = parser.parse_args(external_args)
-    else:
-        args = parser.parse_args()
-    return args
-
-
-def main():
-    args = parse_args()
-    evaluator = Evaluator(args)
+@hydra.main(config_path="conf", config_name="config", version_base="1.3.2")
+def main(cfg):
+    evaluator = Evaluator(cfg.inference)
     evaluator.evaluate()
 
 
