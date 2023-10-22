@@ -2,3 +2,5 @@
 outputs
 checkpoints
 requirements.txt
+.dvc/*
+.dvc/config
