@@ -1,3 +1,4 @@
+import logging
 import os
 from functools import partial
 
@@ -10,6 +11,8 @@ from torch.optim.lr_scheduler import StepLR
 from torchvision import datasets, transforms
 
 from classifier.classifier import Net, ReferenceModel
+
+logger = logging.getLogger(__name__)
 
 
 class Trainer:
@@ -94,8 +97,8 @@ class Trainer:
             ref_loss = step_info_ref["loss"]
 
             if batch_idx % self.cfg.log_interval == 0:
-                print(
-                    "Train Epoch: {} [{}/{} ({:.0f}%)]\tRef loss: {:.6f}\t".format(
+                logger.info(
+                    "Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}\t".format(
                         epoch,
                         batch_idx * len(data),
                         len(self.train_loader.dataset),
@@ -120,7 +123,7 @@ class Trainer:
 
         test_loss /= len(self.test_loader.dataset)
 
-        print(
+        logger.info(
             "\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n".format(
                 test_loss,
                 correct,

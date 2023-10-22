@@ -1,4 +1,5 @@
 import csv
+import logging
 
 import hydra
 import torch
@@ -7,18 +8,20 @@ from torchvision import datasets, transforms
 
 from classifier.classifier import Net
 
+logger = logging.getLogger(__name__)
+
 
 class Evaluator:
-    def __init__(self, args):
-        self.args = args
+    def __init__(self, cfg):
+        self.cfg = cfg
 
-        use_cuda = not args.no_cuda and torch.cuda.is_available()
+        use_cuda = not cfg.no_cuda and torch.cuda.is_available()
 
-        torch.manual_seed(args.seed)
+        torch.manual_seed(cfg.seed)
 
         self.device = torch.device("cuda" if use_cuda else "cpu")
 
-        test_kwargs = {"batch_size": args.test_batch_size}
+        test_kwargs = {"batch_size": cfg.test_batch_size}
         if use_cuda:
             cuda_kwargs = {"num_workers": 1, "pin_memory": True, "shuffle": True}
             test_kwargs.update(cuda_kwargs)
@@ -43,7 +46,7 @@ class Evaluator:
         self.inference_model = Net()
         self.inference_model.load_state_dict(
             torch.load(
-                self.args.path + "/mnist_cnn_ref.pt", map_location=torch.device("cpu")
+                self.cfg.path + "/mnist_cnn_ref.pt", map_location=torch.device("cpu")
             )
         )
         self.inference_model.to(self.device)
@@ -63,7 +66,7 @@ class Evaluator:
             preds.append(pred.detach().cpu().numpy())
             correct += pred.eq(target.view_as(pred)).sum().item()
 
-        with open(self.args.path + "/predictions.csv", "w+") as csvfile:
+        with open(self.cfg.path + "/predictions.csv", "w+") as csvfile:
             writer = csv.writer(csvfile)
             for row in preds:
                 for pred in row:
@@ -71,7 +74,7 @@ class Evaluator:
 
         test_loss /= len(self.test_loader.dataset)
 
-        print(
+        logger.info(
             "\nTest set: Accuracy: {}/{} ({:.0f}%)\n".format(
                 correct,
                 len(self.test_loader.dataset),
