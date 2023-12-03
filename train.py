@@ -78,7 +78,7 @@ class Trainer:
     def train(self):
         for epoch in range(1, self.cfg.epochs + 1):
             self.train_epoch(epoch)
-            self.test()
+            self.accuracy(self.test_loader)
             self.reference_model.lr_scheduler_step()
 
         if self.cfg.save_model:
@@ -109,14 +109,22 @@ class Trainer:
                             ref_loss,
                         )
                     )
+                    test_accuracy = self.accuracy(self.test_loader)
+                    train_accuracy = self.accuracy(self.train_loader)
                     mlflow.log_metric(key="loss", value=ref_loss, step=epoch)
+                    mlflow.log_metric(
+                        key="test_accuracy", value=test_accuracy, step=epoch
+                    )
+                    mlflow.log_metric(
+                        key="train_accuracy", value=train_accuracy, step=epoch
+                    )
 
-    def test(self):
+    def accuracy(self, data_loader):
         self.reference_model.train(False)
 
         test_loss = 0
         correct = 0
-        for data, target in self.test_loader:
+        for data, target in data_loader:
             data, target = data.to(self.device), target.to(self.device)
             step_info_dp = self.reference_model.step(data, target, no_grad=True)
             test_loss += step_info_dp["loss"]  # sum up batch loss
@@ -125,16 +133,17 @@ class Trainer:
             )  # get the index of the max log-probability
             correct += pred.eq(target.view_as(pred)).sum().item()
 
-        test_loss /= len(self.test_loader.dataset)
-
+        test_loss /= len(data_loader.dataset)
+        test_accuracy = 100.0 * correct / len(data_loader.dataset)
         logger.info(
             "\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n".format(
                 test_loss,
                 correct,
-                len(self.test_loader.dataset),
-                100.0 * correct / len(self.test_loader.dataset),
+                len(data_loader.dataset),
+                test_accuracy,
             )
         )
+        return test_accuracy
 
 
 @hydra.main(config_path="conf", config_name="config", version_base="1.3.2")
