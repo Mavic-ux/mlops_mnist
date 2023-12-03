@@ -3,6 +3,7 @@ import os
 from functools import partial
 
 import hydra
+import mlflow
 import torch
 import torch.nn.functional as F
 import torch.optim as optim
@@ -13,6 +14,7 @@ from torchvision import datasets, transforms
 from classifier.classifier import Net, ReferenceModel
 
 logger = logging.getLogger(__name__)
+mlflow.set_tracking_uri("http://localhost:13416/")
 
 
 class Trainer:
@@ -90,22 +92,24 @@ class Trainer:
     def train_epoch(self, epoch):
         self.reference_model.train(True)
 
-        for batch_idx, (data, target) in enumerate(self.train_loader):
-            data, target = data.to(self.device), target.to(self.device)
+        with mlflow.start_run():
+            for batch_idx, (data, target) in enumerate(self.train_loader):
+                data, target = data.to(self.device), target.to(self.device)
 
-            step_info_ref = self.reference_model.step(data, target)
-            ref_loss = step_info_ref["loss"]
+                step_info_ref = self.reference_model.step(data, target)
+                ref_loss = step_info_ref["loss"]
 
-            if batch_idx % self.cfg.log_interval == 0:
-                logger.info(
-                    "Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}\t".format(
-                        epoch,
-                        batch_idx * len(data),
-                        len(self.train_loader.dataset),
-                        100.0 * batch_idx / len(self.train_loader),
-                        ref_loss,
+                if batch_idx % self.cfg.log_interval == 0:
+                    logger.info(
+                        "Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}\t".format(
+                            epoch,
+                            batch_idx * len(data),
+                            len(self.train_loader.dataset),
+                            100.0 * batch_idx / len(self.train_loader),
+                            ref_loss,
+                        )
                     )
-                )
+                    mlflow.log_metric(key="loss", value=ref_loss, step=epoch)
 
     def test(self):
         self.reference_model.train(False)

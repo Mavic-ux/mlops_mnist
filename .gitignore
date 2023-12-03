@@ -1,4 +1,5 @@
 *.pyc
+mlruns
 outputs
 checkpoints
 requirements.txt
